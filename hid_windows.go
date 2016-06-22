@@ -24,6 +24,10 @@ type winDevice struct {
 	info   *DeviceInfo
 }
 
+func (d *winDevice) Info() *DeviceInfo {
+	return d.info
+}
+
 // returns the casted handle of the device
 func (d *winDevice) h() C.HANDLE {
 	return (C.HANDLE)((unsafe.Pointer)(d.handle))
@@ -195,11 +199,17 @@ func ByPath(devicePath string) (*DeviceInfo, error) {
 	const bufLen = 256
 	buff := make([]uint16, bufLen)
 
+	buff[0] = 0
 	C.HidD_GetManufacturerString(dev.h(), (C.PVOID)(&buff[0]), bufLen)
 	devInfo.Manufacturer = syscall.UTF16ToString(buff)
 
+	buff[0] = 0
 	C.HidD_GetProductString(dev.h(), (C.PVOID)(&buff[0]), bufLen)
 	devInfo.Product = syscall.UTF16ToString(buff)
+
+	buff[0] = 0
+	C.HidD_GetSerialNumberString(dev.h(), (C.PVOID)(&buff[0]), bufLen)
+	devInfo.SerialNumber = syscall.UTF16ToString(buff)
 
 	var preparsedData C.PHIDP_PREPARSED_DATA
 	if C.HidD_GetPreparsedData(dev.h(), &preparsedData) != 0 {

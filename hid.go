@@ -19,6 +19,8 @@ type DeviceInfo struct {
 	Manufacturer string
 	// Product contains the product name of the device
 	Product string
+	// Device serial number string
+	SerialNumber string
 
 	InputReportLength   uint16
 	OutputReportLength  uint16
@@ -37,6 +39,8 @@ type Device interface {
 	WriteFeature([]byte) error
 	// Preform an interrupt transfer to the device
 	WriteInterrupt(byte, []byte) (int, error)
+	// Returns info about connected device
+	Info() *DeviceInfo
 }
 
 // FindDevices iterates through all devices with a given vendor and product id
@@ -59,7 +63,7 @@ func FindDevicesByProduct(product string) <-chan *DeviceInfo {
 
 	go func() {
 		for dev := range Devices() {
-			if strings.Contains(dev.Product, product)  {
+			if strings.Contains(dev.Product, product) {
 				result <- dev
 			}
 		}
