@@ -48,7 +48,7 @@ func FindDevices(vendor uint16, product uint16) <-chan *DeviceInfo {
 	result := make(chan *DeviceInfo)
 	go func() {
 		for dev := range Devices() {
-			if dev.VendorId == vendor && dev.ProductId == product {
+			if (vendor == 0 || dev.VendorId == vendor) && (product == 0 || dev.ProductId == product) {
 				result <- dev
 			}
 		}
@@ -57,7 +57,7 @@ func FindDevices(vendor uint16, product uint16) <-chan *DeviceInfo {
 	return result
 }
 
-// FindDevicesByProduct iterates through all devices with a given vendor and product id
+// FindDevicesByProduct iterates through all devices with a given vendor and product id. vendor and product id 0 is wildcard
 func FindDevicesByProduct(product string) <-chan *DeviceInfo {
 	result := make(chan *DeviceInfo)
 
@@ -67,6 +67,7 @@ func FindDevicesByProduct(product string) <-chan *DeviceInfo {
 				result <- dev
 			}
 		}
+		close(result)
 	}()
 
 	return result
